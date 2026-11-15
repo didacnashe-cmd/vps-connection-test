@@ -1,0 +1,23 @@
+name: test-conexion
+on: workflow_dispatch
+
+jobs:
+  ping:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Unir a Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Preparar SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.VPS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Probar
+        run: ssh ubuntu@oracle "hostname && uptime"
